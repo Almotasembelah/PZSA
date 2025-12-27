@@ -41,7 +41,7 @@ The system utilizes a distributed architecture to handle video processing and ev
 
 * **Core Logic:** Processes video frames, detects objects, and evaluates ROI-based rules.
 * **Messaging:** Uses **Kafka** to handle real-time violation alerts and data streams.
-* **Documentation:** Detailed architectural diagrams and design decisions can be found in the [Project Wiki](https://www.google.com/search?q=./wiki).
+* **Documentation:** Detailed architectural diagrams and design decisions can be found in the [Project Wiki](https://github.com/Almotasembelah/PZSA/wiki).
 
 ---
 
