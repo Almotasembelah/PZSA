@@ -24,4 +24,4 @@ pip install uv
 
 echo "Installing dependencies .........."
 uv init
-uv sync
+uv sync --all-packages

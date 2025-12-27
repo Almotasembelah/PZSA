@@ -14,8 +14,8 @@ PZSA
 ├── PZSA/                        # Main source code package
 │   ├── configs/                 # System configuration (DB, Kafka, Logging)
 │   ├── data/                    # Database layer: CRUD operations and ORM entities
+│   |── controller/              # Logic for managing violation events (adding to db)
 │   ├── services/                
-│   │   ├── controller/          # Logic for managing violation events (adding to db)
 │   │   ├── detection/           # Core CV logic (YOLO inference & violation rules)
 │   │   ├── frame_reader/        # Handles video ingestion and frame extraction
 │   │   └── streaming/           # Manages Kafka data streams

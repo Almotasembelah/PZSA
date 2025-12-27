@@ -1,8 +1,7 @@
-from PZSA.data.database_manager import DatabaseManager
-from PZSA.data.crud import CRUDViolation
-from PZSA.data.entities import Violation
-from PZSA.configs import logger
-from PZSA.configs.database_cfg import get_settings
+from PZSA.data import DatabaseManager
+from PZSA.data import CRUDViolation
+from PZSA.data import Violation
+from PZSA.configs import logger, get_settings
 import os, cv2
 from datetime import datetime
 

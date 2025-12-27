@@ -1,0 +1,32 @@
+[project]
+name = "detection"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "ioutrack-rs>=0.4.0",
+    "opencv-python>=4.12.0.88",
+    "ultralytics>=8.3.240",
+    "torch>=2.7.0",
+    "torchvision>=0.22.0",
+    "confluent-kafka>=2.12.2",
+    "shared",
+]
+
+[tool.uv.sources]
+shared = { workspace = true }
+torch = [
+  { index = "pytorch-cu126", marker = "sys_platform == 'win32'" },
+]
+torchvision = [
+  { index = "pytorch-cu126", marker = "sys_platform == 'win32'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true

@@ -4,7 +4,7 @@ from datetime import datetime
 
 from .utils import iou, draw_detections, decode_frame
 from PZSA.configs import TOPICS, CONFIGS, logger
-from PZSA.services.controller import ViolationController
+from PZSA.controller import ViolationController
 from PZSA.data import DatabaseManager
 
 def delivery_report(err, msg):

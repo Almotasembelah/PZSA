@@ -24,50 +24,85 @@ services:
       interval: 5s
       retries: 5
 
-  # This service runs topics.sh and then exits
-  init-kafka:
-    build: .
+  frame_reader:
+    build:
+      context: .
+      dockerfile: PZSA/services/frame_reader/Dockerfile
     depends_on:
       kafka:
         condition: service_healthy
-    entrypoint: /bin/bash
-    command: ./scripts/topics_docker.sh
-
-  # Python Services
-  frame-reader:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    depends_on:
-      init-kafka:
-        condition: service_completed_successfully
-    command: uv run python -m PZSA.services.frame_reader.read
+    environment:
+      KAFKA_BROKER: kafka:9092
+    healthcheck:
+      test: ["CMD", "bash", "-c", "pgrep -f frame_reader || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   detector:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: PZSA/services/detection/detector/Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]
     depends_on:
-      init-kafka:
-        condition: service_completed_successfully
-    command: uv run python -m PZSA.services.detection.detector.detect
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER: kafka:9092
+    healthcheck:
+      test: ["CMD", "bash", "-c", "pgrep -f detector || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
-  violation-checker:
+  violation_checker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: PZSA/services/detection/violation_checker/Dockerfile
     depends_on:
-      init-kafka:
-        condition: service_completed_successfully
-    command: uv run python -m PZSA.services.detection.violation_checker.check_violation
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER: kafka:9092
+    healthcheck:
+      test: ["CMD", "bash", "-c", "pgrep -f violation_checker || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
-  ui-app:
+  streaming:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: PZSA/services/streaming/Dockerfile
     depends_on:
-      init-kafka:
-        condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER: kafka:9092
     ports:
-      - "8050:8050"
-    command: uv run python -m PZSA.ui.app
+      - "5050:5050"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "curl -f http://localhost:5050/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: .
+      dockerfile: PZSA/ui/Dockerfile
+    depends_on:
+      streaming:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      STREAMING_URL: http://streaming:5050

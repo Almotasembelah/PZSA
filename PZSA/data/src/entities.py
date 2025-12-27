@@ -8,7 +8,7 @@ from sqlalchemy import (
     create_engine,
 )
 
-from PZSA.configs.database_cfg import get_settings
+from PZSA.configs import get_settings
 
 from .base import Base
 

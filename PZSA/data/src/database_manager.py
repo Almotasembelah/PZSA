@@ -3,7 +3,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from .base import Base
 
 from PZSA.configs import logger
-from PZSA.configs.database_cfg import get_settings
+from PZSA.configs import get_settings
 
 cfg = get_settings()
 

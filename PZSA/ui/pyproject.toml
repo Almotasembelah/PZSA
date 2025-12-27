@@ -1,0 +1,19 @@
+[project]
+name = "ui"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+dependencies = [
+  "flask>=3.1.2",
+  "flask-cors>=6.0.2",
+  "flask-socketio>=5.5.1",
+  "shared",
+  "streaming"
+]
+
+[tool.uv.sources]
+shared = { workspace = true }
+streaming = { workspace = true }
+
+[project.scripts]
+app = "ui.src:app"
