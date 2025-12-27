@@ -32,7 +32,7 @@ services:
       kafka:
         condition: service_healthy
     environment:
-      KAFKA_BROKER: kafka:9092
+      KAFKA_BROKER: 127.0.0.1:9092
     healthcheck:
       test: ["CMD", "bash", "-c", "pgrep -f frame_reader || exit 1"]
       interval: 15s
@@ -53,7 +53,7 @@ services:
       kafka:
         condition: service_healthy
     environment:
-      KAFKA_BROKER: kafka:9092
+      KAFKA_BROKER: 127.0.0.1:9092
     healthcheck:
       test: ["CMD", "bash", "-c", "pgrep -f detector || exit 1"]
       interval: 15s
@@ -69,7 +69,7 @@ services:
       kafka:
         condition: service_healthy
     environment:
-      KAFKA_BROKER: kafka:9092
+      KAFKA_BROKER: 127.0.0.1:9092
     healthcheck:
       test: ["CMD", "bash", "-c", "pgrep -f violation_checker || exit 1"]
       interval: 15s
@@ -85,7 +85,7 @@ services:
       kafka:
         condition: service_healthy
     environment:
-      KAFKA_BROKER: kafka:9092
+      KAFKA_BROKER: 127.0.0.1:9092
     ports:
       - "5050:5050"
     healthcheck:
