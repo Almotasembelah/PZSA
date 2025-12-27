@@ -10,6 +10,7 @@ WORKDIR /app
 
 # Copy workspace metadata so uv can resolve deps
 COPY pyproject.toml ./
+COPY uv.lock ./
 
 # Copy service + shared packages only
 COPY PZSA/configs ./PZSA/configs
@@ -18,10 +19,6 @@ COPY PZSA/services/detection/detector ./PZSA/services/detection/detector
 # Install uv
 RUN pip install --no-cache-dir uv
 
-# Install only this project's dependencies
-RUN uv sync --project detection --no-dev
+RUN uv sync --all-packages --no-dev
 
-# Ensure project venv is active
-ENV PATH="/app/.venv/bin:$PATH"
-
-CMD ["uv", "run", "--project", "detection", "PZSA/services/detection/detector/src/detect.py"]
+CMD ["uv", "run", "python", "-m", "PZSA.services.detection.detector.src.detect"]

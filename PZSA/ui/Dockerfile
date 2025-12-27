@@ -20,10 +20,6 @@ COPY PZSA/ui ./PZSA/ui
 # Install uv
 RUN pip install --no-cache-dir uv
 
-# Install only this project's dependencies
-RUN uv sync --project ui --no-dev
+RUN uv sync --all-packages --no-dev
 
-# Ensure project venv is active
-ENV PATH="/app/ui/.venv/bin:$PATH"
-
-CMD ["uv", "run", "--project", "ui", "PZSA/ui/src/app.py"]
+CMD ["uv", "run", "python", "-m", "PZSA.ui.src.app"]

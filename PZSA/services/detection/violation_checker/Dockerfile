@@ -20,10 +20,6 @@ COPY PZSA/services/detection/violation_checker ./PZSA/services/detection/violati
 # Install uv
 RUN pip install --no-cache-dir uv
 
-# Install only this project's dependencies
-RUN uv sync --project violation_checker --no-dev
+RUN uv sync --all-packages --no-dev
 
-# Ensure project venv is active
-ENV PATH="/app/.venv/bin:$PATH"
-
-CMD ["uv", "run", "--project", "violation_checker", "PZSA/services/detection/violation_checker/src/check_violation.py"]
+CMD ["uv", "run", "python", "-m", "PZSA.services.detection.violation_checker.src.check_violation"]
