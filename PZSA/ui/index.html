@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video ROI Annotation Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 500;
+        }
+
+        .file-input-label:hover {
+            background: #5568d3;
+        }
+
+        .file-name {
+            display: inline-block;
+            margin-left: 15px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .video-section {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .video-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .canvas-container {
+            position: relative;
+            display: inline-block;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            cursor: crosshair;
+        }
+
+        #processedCanvas {
+            cursor: default;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+            font-size: 16px;
+            padding: 14px 32px;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .roi-list {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .roi-list h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .roi-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .roi-info {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .roi-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .delete-roi {
+            background: #fc8181;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-roi:hover {
+            background: #f56565;
+        }
+
+        .violation-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .violation-section h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .violation-count {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .violation-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .instructions {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .instructions p {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .processing {
+            text-align: center;
+            padding: 20px;
+            background: #edf2f7;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-info {
+            color: #555;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .processing-status {
+            background: #fff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .status-text {
+            color: #667eea;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 968px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Video ROI Annotation Tool</h1>
+        <p class="subtitle">Upload a video, draw regions of interest, and detect violations in real-time</p>
+
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <input type="file" id="videoInput" accept="video/*">
+                <label for="videoInput" class="file-input-label">Choose Video File</label>
+            </div>
+            <span class="file-name" id="fileName">No file chosen</span>
+        </div>
+
+        <div class="instructions hidden" id="instructions">
+            <p><strong>Instructions:</strong></p>
+            <p>• Click and drag on the video frame to draw rectangular ROIs</p>
+            <p>• Each ROI will be assigned a unique color</p>
+            <p>• Delete unwanted ROIs using the delete button</p>
+            <p>• Click "Process Video" when ready to analyze violations</p>
+        </div>
+
+        <div class="video-grid hidden" id="videoGrid">
+            <div class="video-section">
+                <h3>Original Frame (Draw ROIs)</h3>
+                <div class="canvas-container">
+                    <canvas id="canvas"></canvas>
+                </div>
+            </div>
+            <div class="video-section">
+                <h3>Processed Video Output</h3>
+                <div class="canvas-container">
+                    <canvas id="processedCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls hidden" id="controls">
+            <button class="btn-danger" id="clearBtn">Clear All ROIs</button>
+            <button class="btn-primary" id="undoBtn">Undo Last ROI</button>
+        </div>
+
+        <div class="roi-list hidden" id="roiList">
+            <h3>Defined ROIs (<span id="roiCount">0</span>)</h3>
+            <div id="roiItems"></div>
+        </div>
+
+        <div class="hidden" id="processSection">
+            <button class="btn-success" id="processBtn">Process Video</button>
+        </div>
+
+        <div class="processing hidden" id="processingIndicator">
+            <div class="spinner"></div>
+            <p>Processing video and detecting violations...</p>
+            <div class="processing-status">
+                <div class="status-text" id="statusText">Initializing...</div>
+                <div class="progress-info" id="progressInfo">Frame 0 / 0</div>
+            </div>
+        </div>
+
+        <div class="violation-section hidden" id="violationSection">
+            <h3>Violation Detection Results</h3>
+            <div class="violation-count" id="violationCount">0</div>
+            <div class="violation-label">Total Violations Detected</div>
+        </div>
+    </div>
+
+    <video id="videoElement" style="display:none;"></video>
+
+    <script>
+        const videoInput = document.getElementById('videoInput');
+        const fileName = document.getElementById('fileName');
+        const videoElement = document.getElementById('videoElement');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const processedCanvas = document.getElementById('processedCanvas');
+        const processedCtx = processedCanvas.getContext('2d');
+        const videoGrid = document.getElementById('videoGrid');
+        const instructions = document.getElementById('instructions');
+        const controls = document.getElementById('controls');
+        const roiList = document.getElementById('roiList');
+        const roiItems = document.getElementById('roiItems');
+        const roiCount = document.getElementById('roiCount');
+        const processSection = document.getElementById('processSection');
+        const processBtn = document.getElementById('processBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const processingIndicator = document.getElementById('processingIndicator');
+        const violationSection = document.getElementById('violationSection');
+        const violationCountEl = document.getElementById('violationCount');
+        const statusText = document.getElementById('statusText');
+        const progressInfo = document.getElementById('progressInfo');
+
+        let rois = [];
+        let isDrawing = false;
+        let startX, startY;
+        let currentROI = null;
+        let uploadedVideoFile = null;
+        const colors = ['#667eea', '#f093fb', '#4facfe', '#43e97b', '#fa709a', '#feca57', '#ee5a6f', '#c471ed'];
+        let colorIndex = 0;
+
+        videoInput.addEventListener('change', handleVideoUpload);
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', endDrawing);
+        clearBtn.addEventListener('click', clearAllROIs);
+        undoBtn.addEventListener('click', undoLastROI);
+        processBtn.addEventListener('click', processVideo);
+
+        function handleVideoUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                uploadedVideoFile = file;
+                fileName.textContent = file.name;
+                const url = URL.createObjectURL(file);
+                videoElement.src = url;
+                
+                videoElement.addEventListener('loadeddata', () => {
+                    videoElement.currentTime = 0;
+                });
+
+                videoElement.addEventListener('seeked', () => {
+                    canvas.width = videoElement.videoWidth;
+                    canvas.height = videoElement.videoHeight;
+                    processedCanvas.width = videoElement.videoWidth;
+                    processedCanvas.height = videoElement.videoHeight;
+                    
+                    ctx.drawImage(videoElement, 0, 0);
+                    
+                    // Show placeholder on processed canvas
+                    processedCtx.fillStyle = '#1a202c';
+                    processedCtx.fillRect(0, 0, processedCanvas.width, processedCanvas.height);
+                    processedCtx.fillStyle = '#fff';
+                    processedCtx.font = '20px Arial';
+                    processedCtx.textAlign = 'center';
+                    processedCtx.fillText('Processed frames will appear here', processedCanvas.width/2, processedCanvas.height/2);
+                    
+                    videoGrid.classList.remove('hidden');
+                    instructions.classList.remove('hidden');
+                    controls.classList.remove('hidden');
+                    roiList.classList.remove('hidden');
+                    processSection.classList.remove('hidden');
+                }, { once: true });
+            }
+        }
+
+        function startDrawing(e) {
+            const rect = canvas.getBoundingClientRect();
+            startX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            startY = (e.clientY - rect.top) * (canvas.height / rect.height);
+            isDrawing = true;
+            currentROI = {
+                x: startX,
+                y: startY,
+                width: 0,
+                height: 0,
+                color: colors[colorIndex % colors.length]
+            };
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const currentX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const currentY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+            currentROI.width = currentX - startX;
+            currentROI.height = currentY - startY;
+
+            redrawCanvas();
+            drawROI(currentROI);
+        }
+
+        function endDrawing() {
+            if (!isDrawing) return;
+            isDrawing = false;
+
+            if (Math.abs(currentROI.width) > 5 && Math.abs(currentROI.height) > 5) {
+                if (currentROI.width < 0) {
+                    currentROI.x += currentROI.width;
+                    currentROI.width = Math.abs(currentROI.width);
+                }
+                if (currentROI.height < 0) {
+                    currentROI.y += currentROI.height;
+                    currentROI.height = Math.abs(currentROI.height);
+                }
+
+                rois.push({...currentROI});
+                colorIndex++;
+                updateROIList();
+                redrawCanvas();
+            }
+            currentROI = null;
+        }
+
+        function drawROI(roi) {
+            ctx.strokeStyle = roi.color;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(roi.x, roi.y, roi.width, roi.height);
+            
+            ctx.fillStyle = roi.color + '33';
+            ctx.fillRect(roi.x, roi.y, roi.width, roi.height);
+        }
+
+        function redrawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(videoElement, 0, 0);
+            rois.forEach(roi => drawROI(roi));
+        }
+
+        function updateROIList() {
+            roiCount.textContent = rois.length;
+            roiItems.innerHTML = '';
+            
+            rois.forEach((roi, index) => {
+                const item = document.createElement('div');
+                item.className = 'roi-item';
+                item.innerHTML = `
+                    <div class="roi-info">
+                        <span class="roi-color" style="background: ${roi.color}"></span>
+                        ROI ${index + 1}: x=${roi.x}, y=${roi.y}, 
+                        w=${roi.width}, h=${roi.height}
+                    </div>
+                    <button class="delete-roi" onclick="deleteROI(${index})">Delete</button>
+                `;
+                roiItems.appendChild(item);
+            });
+        }
+
+        function deleteROI(index) {
+            rois.splice(index, 1);
+            updateROIList();
+            redrawCanvas();
+        }
+
+        function clearAllROIs() {
+            rois = [];
+            colorIndex = 0;
+            updateROIList();
+            redrawCanvas();
+        }
+
+        function undoLastROI() {
+            if (rois.length > 0) {
+                rois.pop();
+                colorIndex--;
+                updateROIList();
+                redrawCanvas();
+            }
+        }
+
+        async function processVideo() {
+            if (rois.length === 0) {
+                alert('Please draw at least one ROI before processing');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('video', uploadedVideoFile);
+            formData.append('rois', JSON.stringify(rois.map((roi, index) => ({
+                id: index + 1,
+                x: Math.round(roi.x),
+                y: Math.round(roi.y),
+                width: Math.round(roi.width),
+                height: Math.round(roi.height),
+                color: roi.color
+            }))));
+
+            processSection.classList.add('hidden');
+            processingIndicator.classList.remove('hidden');
+            violationSection.classList.add('hidden');
+
+            try {
+                // Start processing
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Processing failed');
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+                let totalViolations = 0;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+
+                    // Process full SSE events only
+                    let boundaryIndex;
+                    while ((boundaryIndex = buffer.indexOf("\n\n")) >= 0) {
+                        const event = buffer.slice(0, boundaryIndex).trim();
+                        buffer = buffer.slice(boundaryIndex + 2);
+
+                        if (!event.startsWith("data:")) continue;
+
+                        let payload;
+                        try {
+                            payload = JSON.parse(event.slice(6));
+                        } catch {
+                            continue; // wait for full JSON chunk
+                        }
+
+                        if (payload.type === "frame") {
+                            const img = new Image();
+                            img.onload = () =>
+                                processedCtx.drawImage(
+                                    img,
+                                    0,
+                                    0,
+                                    processedCanvas.width,
+                                    processedCanvas.height
+                                );
+                            img.src = "data:image/jpeg;base64," + payload.frame_data;
+
+                        } else if (payload.type === "complete") {
+                            statusText.textContent = "Processing complete!";
+                            totalViolations = payload.total_violations;
+                        }
+                    }
+                }
+
+                // Show results
+                processingIndicator.classList.add('hidden');
+                violationSection.classList.remove('hidden');
+                violationCountEl.textContent = totalViolations;
+                processSection.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error processing video:', error);
+                alert('Error processing video. Please try again.');
+                processingIndicator.classList.add('hidden');
+                processSection.classList.remove('hidden');
+            }
+        }
+
+        window.deleteROI = deleteROI;
+    </script>
+</body>
+</html>
