@@ -47,10 +47,12 @@ The system utilizes a distributed architecture to handle video processing and ev
 
 ## Output
 
-<video width="640" height="480" controls>
+<!-- <video width="640" height="480" controls>
   <source src="resources/output/output.mp4" type="video/mp4">
   Your browser does not support the video tag.
-</video>
+</video> -->
+
+[Watch the video](resources/output/output.mp4)
 
 ---
 ## 🚀 Setup & Installation
