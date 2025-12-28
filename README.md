@@ -92,7 +92,7 @@ source ./scripts/run.sh
 
 5. **Access Dashboard:** Open [http://127.0.0.1:5000](https://www.google.com/search?q=http://127.0.0.1:5000) in your browser.
 
-### Docker Installation
+<!-- ### Docker Installation
 
 If you prefer a containerized setup, use the provided Compose file:
 
@@ -100,7 +100,7 @@ If you prefer a containerized setup, use the provided Compose file:
 docker compose up --build
 ```
 
-Access the system at [http://127.0.0.1:5000](https://www.google.com/search?q=http://127.0.0.1:5000).
+Access the system at [http://127.0.0.1:5000](https://www.google.com/search?q=http://127.0.0.1:5000). -->
 
 ---
 
